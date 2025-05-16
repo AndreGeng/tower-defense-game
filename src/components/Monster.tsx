@@ -1,4 +1,5 @@
 import React from "react";
+import { Rect } from 'react-konva';
 import type { Monster as MonsterType } from "../types/game";
 
 interface Props {
@@ -6,25 +7,33 @@ interface Props {
 }
 
 const Monster: React.FC<Props> = ({ monster }) => {
-  const healthPercentage = (monster.hp / monster.maxHp) * 100;
-
   return (
-    <div
-      className="absolute bg-red-500"
-      style={{
-        left: `${monster.position.x}px`,
-        top: `${monster.position.y}px`,
-        width: `${monster.width}px`,
-        height: `${monster.height}px`,
-      }}
-    >
-      <div className="absolute -top-2 w-full h-1 bg-gray-300">
-        <div
-          className="h-full bg-green-500"
-          style={{ width: `${healthPercentage}%` }}
-        />
-      </div>
-    </div>
+    <React.Fragment>
+      {/* 怪物主体 */}
+      <Rect
+        x={monster.position.x}
+        y={monster.position.y}
+        width={monster.width}
+        height={monster.height}
+        fill="#ef4444"
+      />
+      {/* 血条背景 */}
+      <Rect
+        x={monster.position.x}
+        y={monster.position.y - 8}
+        width={monster.width}
+        height={4}
+        fill="#d1d5db"
+      />
+      {/* 血条 */}
+      <Rect
+        x={monster.position.x}
+        y={monster.position.y - 8}
+        width={monster.width * (monster.hp / monster.maxHp)}
+        height={4}
+        fill="#22c55e"
+      />
+    </React.Fragment>
   );
 };
 
