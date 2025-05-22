@@ -1,5 +1,5 @@
 import React from 'react';
-import { Circle, Group } from 'react-konva';
+import { Circle, Group, Star } from 'react-konva';
 import type { Tower as TowerType } from '../types/game';
 
 interface Props {
@@ -7,19 +7,19 @@ interface Props {
 }
 
 const Tower: React.FC<Props> = ({ tower }) => {
-  const baseColor = tower.type === 'NORMAL' ? '#FF9999' : '#B19CD9';
-  const accentColor = tower.type === 'NORMAL' ? '#FFB3B3' : '#C8B4E6';
+  const baseColor = tower.type === 'NORMAL' ? '#FFB6C1' : '#DDA0DD';
+  const accentColor = tower.type === 'NORMAL' ? '#FFC0CB' : '#EE82EE';
 
   return (
     <Group>
-      {/* 塔的主体 */}
+      {/* 塔的主体 - 使用更柔和的粉色系 */}
       <Circle
         x={tower.position.x + 20}
         y={tower.position.y + 20}
         radius={20}
         fill={baseColor}
-        shadowColor="#00000033"
-        shadowBlur={5}
+        shadowColor="#FFC0CB33"
+        shadowBlur={8}
         shadowOffset={{ x: 2, y: 2 }}
       />
       {/* 装饰圆圈 */}
@@ -29,12 +29,15 @@ const Tower: React.FC<Props> = ({ tower }) => {
         radius={12}
         fill={accentColor}
       />
-      {/* 高光效果 */}
-      <Circle
-        x={tower.position.x + 15}
-        y={tower.position.y + 15}
-        radius={5}
-        fill="#FFFFFF88"
+      {/* 星星装饰效果 */}
+      <Star
+        x={tower.position.x + 20}
+        y={tower.position.y + 20}
+        numPoints={5}
+        innerRadius={5}
+        outerRadius={8}
+        fill="#FFF"
+        opacity={0.8}
       />
     </Group>
   );

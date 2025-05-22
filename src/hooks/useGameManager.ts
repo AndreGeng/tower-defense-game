@@ -1,20 +1,21 @@
 import { useState, useEffect } from "react";
 import { useLatest } from "ahooks";
 import type { GameState, Monster } from "../types/game";
+import { generatePath } from "../game/path";
+import type { PathPoint } from "../game/path";
 import { WAVE_CONFIGS } from "../game/configs";
-import { SPAWN_POINT, END_POINT, GAME_LOOP_FPS } from "../game/constants";
 import { calculateNewPosition, findTargetMonster } from "../game/utils";
 
 // 游戏管理器
 export const useGameManager = (initialState: GameState) => {
   const [gameState, setGameState] = useState<GameState>(initialState);
   const [currentWave, setCurrentWave] = useState(0);
-  const [monstersToSpawn, setMonstersToSpawn] = useState<
-    Array<Omit<Monster, "id" | "position">>
-  >([]);
   const [lastSpawnTime, setLastSpawnTime] = useState(0);
-  const monstersToSpawnRef = useLatest(monstersToSpawn);
   const lastSpawnTimeRef = useLatest(lastSpawnTime);
+  // 添加路径状态
+  const [path] = useState<PathPoint[]>(generatePath());
+  const SPAWN_POINT = path[0];
+  const END_POINT = path[path.length - 1];
 
   // 准备波次的怪物
   const prepareWaveMonsters = (waveIndex: number) => {
@@ -40,33 +41,10 @@ export const useGameManager = (initialState: GameState) => {
     return monsters;
   };
 
-  // 更新怪物状态
-  const updateMonsters = (prevState: GameState) => {
-    let healthLoss = 0;
-    const updatedMonsters = prevState.monsters
-      .map((monster) => {
-        const newPosition = calculateNewPosition(monster);
-
-        // 检查是否到达终点
-        if (
-          Math.abs(newPosition.x - END_POINT.x) < monster.width &&
-          Math.abs(newPosition.y - END_POINT.y) < monster.height
-        ) {
-          healthLoss += monster.damage;
-          return null;
-        }
-
-        return {
-          ...monster,
-          position: newPosition,
-        };
-      })
-      .filter(Boolean) as Monster[];
-    return {
-      monsters: updatedMonsters,
-      healthLoss,
-    };
-  };
+  const [monstersToSpawn, setMonstersToSpawn] = useState<
+    Array<Omit<Monster, "id" | "position">>
+  >(prepareWaveMonsters(currentWave));
+  const monstersToSpawnRef = useLatest(monstersToSpawn);
 
   // 处理塔的攻击
   const handleTowerAttacks = (prevState: GameState) => {
@@ -99,13 +77,37 @@ export const useGameManager = (initialState: GameState) => {
   };
 
   useEffect(() => {
+    // 更新怪物状态
+    const updateMonsters = (prevState: GameState) => {
+      let healthLoss = 0;
+      const updatedMonsters = prevState.monsters
+        .map((monster) => {
+          const newPosition = calculateNewPosition(monster, path);
+
+          // 检查是否到达终点
+          if (
+            Math.abs(newPosition.x - END_POINT.x) < monster.width &&
+            Math.abs(newPosition.y - END_POINT.y) < monster.height
+          ) {
+            healthLoss += monster.damage;
+            return null;
+          }
+
+          return {
+            ...monster,
+            position: newPosition,
+          };
+        })
+        .filter(Boolean) as Monster[];
+      return {
+        monsters: updatedMonsters,
+        healthLoss,
+      };
+    };
     // 开始新的波次
     const startNewWave = () => {
       const newWaveMonsters = prepareWaveMonsters(currentWave);
       setMonstersToSpawn(newWaveMonsters);
-      if (currentWave === 0) {
-        return;
-      }
       setCurrentWave((prev) => prev + 1);
     };
     // 检查波次状态
@@ -114,7 +116,7 @@ export const useGameManager = (initialState: GameState) => {
         monstersToSpawnRef.current.length === 0 &&
         prevState.monsters.length === 0
       ) {
-        if (currentWave < WAVE_CONFIGS.length) {
+        if (currentWave < WAVE_CONFIGS.length - 1) {
           startNewWave();
         } else {
           return "won";
@@ -180,23 +182,33 @@ export const useGameManager = (initialState: GameState) => {
         };
       });
     };
-    if (currentWave === 0) {
-      startNewWave();
-    }
-    const gameLoop = setInterval(() => {
-      if (gameState.gameStatus !== "playing") {
-        clearInterval(gameLoop);
-        return;
-      }
-      main();
-    }, 1000 / GAME_LOOP_FPS);
+    let gameLoop: number;
+    const startNextGameLoop = () => {
+      gameLoop = requestAnimationFrame(() => {
+        if (gameState.gameStatus !== "playing") {
+          cancelAnimationFrame(gameLoop);
+          return;
+        }
+        main();
+        startNextGameLoop();
+      });
+    };
+    startNextGameLoop();
 
-    return () => clearInterval(gameLoop);
-  }, [gameState.gameStatus, currentWave, lastSpawnTimeRef, monstersToSpawnRef]);
+    return () => cancelAnimationFrame(gameLoop);
+  }, [
+    gameState.gameStatus,
+    currentWave,
+    lastSpawnTimeRef,
+    monstersToSpawnRef,
+    SPAWN_POINT,
+    END_POINT,
+    path,
+  ]);
 
   return {
     gameState,
+    path,
     setGameState,
   };
 };
-

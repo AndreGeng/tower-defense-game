@@ -26,7 +26,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         height: MONSTER_HEIGHT,
       },
       {
-        count: 3,
+        count: 2,
         hp: ELITE_MONSTER.HP,
         speed: ELITE_MONSTER.SPEED,
         damage: ELITE_MONSTER.DAMAGE,
