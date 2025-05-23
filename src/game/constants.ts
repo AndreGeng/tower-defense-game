@@ -19,7 +19,7 @@ export const MONSTER_SPAWN_INTERVAL = 2000;
 // 怪物属性常量
 export const NORMAL_MONSTER = {
   HP: 100,
-  SPEED: 2,
+  SPEED: 1,
   DAMAGE: 1,
 };
 

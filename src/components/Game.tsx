@@ -6,11 +6,14 @@ import TowerComponent from "./Tower";
 import GameOverModal from "./GameOverModal";
 import { useGameManager } from "../hooks/useGameManager";
 import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "../game/constants";
+import { WAVE_CONFIGS } from "../game/configs";
 
 const initialGameState: GameState = {
   playerHealth: 10,
   gold: 100,
-  wave: 1,
+  wave: 0,
+  monstersToSpawn: prepareWaveMonsters(0),
+  lastSpawnTime: 0,
   monsters: [],
   towers: [],
   gameStatus: "playing",
@@ -18,6 +21,7 @@ const initialGameState: GameState = {
 
 import TowerSelector from "./TowerSelector";
 import type { TowerOption } from "./TowerSelector";
+import { prepareWaveMonsters } from "../game/utils";
 
 const Game: React.FC = () => {
   const { gameState, path, setGameState } = useGameManager(initialGameState);
@@ -197,7 +201,7 @@ const Game: React.FC = () => {
           <Text
             x={20}
             y={70}
-            text={`🌊 波数: ${gameState.wave}`}
+            text={`🌊 波数: ${gameState.wave + 1}/${WAVE_CONFIGS.length}`}
             fontSize={16}
             fill="#FF69B4"
             fontFamily="Arial"

@@ -1,5 +1,6 @@
 import type { Monster, Tower, Position } from "../types/game";
 import { GRID_SIZE } from "./constants";
+import { WAVE_CONFIGS } from "./configs";
 
 export const calculateNewPosition = (
   monster: Monster,
@@ -72,4 +73,33 @@ export const findTargetMonster = (
     );
     return distance <= tower.range;
   });
+};
+
+let id = 0;
+export const getId = () => {
+  return ++id;
+};
+
+// 准备波次的怪物
+export const prepareWaveMonsters = (waveIndex: number) => {
+  if (waveIndex >= WAVE_CONFIGS.length) return [];
+
+  const wave = WAVE_CONFIGS[waveIndex];
+  const monsters: Array<Omit<Monster, "id" | "position">> = [];
+
+  wave.monsters.forEach((config) => {
+    for (let i = 0; i < config.count; i++) {
+      monsters.push({
+        hp: config.hp,
+        maxHp: config.hp,
+        speed: config.speed,
+        damage: config.damage,
+        width: config.width,
+        height: config.height,
+        slowEffect: 1,
+      });
+    }
+  });
+
+  return monsters;
 };

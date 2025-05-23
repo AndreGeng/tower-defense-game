@@ -47,8 +47,9 @@ export interface GameState {
   playerHealth: number;
   gold: number;
   wave: number;
+  monstersToSpawn: Omit<Monster, "id" | "position">[];
+  lastSpawnTime: number;
   monsters: Monster[];
   towers: Tower[];
   gameStatus: "playing" | "won" | "lost";
 }
-
