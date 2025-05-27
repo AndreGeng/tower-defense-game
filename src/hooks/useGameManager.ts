@@ -146,7 +146,7 @@ export const useGameManager = (initialState: GameState) => {
     // 处理塔的攻击
     handleTowerAttacks();
     // 检查游戏状态
-    checkGameStatus();
+    // checkGameStatus();
   }, [spawnMonster, updateMonsters, checkGameStatus, handleTowerAttacks]);
 
   useEffect(() => {

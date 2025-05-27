@@ -30,12 +30,12 @@ export const TOWER_PANEL_OFFSET_Y = 10;
 // 怪物属性常量
 export const NORMAL_MONSTER = {
   HP: 100,
-  SPEED: 3,
+  SPEED: 1,
   DAMAGE: 1,
 };
 
 export const ELITE_MONSTER = {
   HP: 150,
-  SPEED: 6,
+  SPEED: 2,
   DAMAGE: 2,
 };

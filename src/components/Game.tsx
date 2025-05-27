@@ -5,17 +5,9 @@ import MonsterComponent from "./Monster";
 import TowerComponent from "./Tower";
 import GameOverModal from "./GameOverModal";
 import { useGameManager } from "../hooks/useGameManager";
-import {
-  GRID_SIZE,
-  GAME_WIDTH,
-  GAME_HEIGHT,
-  INFO_PANEL_WIDTH,
-  INFO_PANEL_HEIGHT,
-  INFO_PANEL_OFFSET_X,
-  INFO_PANEL_OFFSET_Y,
-} from "../game/constants";
-import { WAVE_CONFIGS } from "../game/configs";
+import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "../game/constants";
 import { useTowerDrag } from "../hooks/useTowerDrag";
+import { InfoPanel } from "./InfoPanel";
 import { Group, Circle } from "react-konva";
 
 const initialGameState: GameState = {
@@ -115,43 +107,6 @@ const Game: React.FC = () => {
           />
           {renderGrid()}
           {renderPath()}
-          {/* 状态栏背景 */}
-          <Rect
-            x={INFO_PANEL_OFFSET_X}
-            y={INFO_PANEL_OFFSET_Y}
-            width={INFO_PANEL_WIDTH}
-            height={INFO_PANEL_HEIGHT}
-            fill="#FFF0F5"
-            cornerRadius={8}
-            shadowColor="#FFB6C1"
-            shadowBlur={5}
-            shadowOffset={{ x: 2, y: 2 }}
-          />
-          {/* 状态文本 */}
-          <Text
-            x={20}
-            y={20}
-            text={`❤️ 生命值: ${gameState.playerHealth}`}
-            fontSize={16}
-            fill="#FF69B4"
-            fontFamily="Arial"
-          />
-          <Text
-            x={20}
-            y={45}
-            text={`💰 金币: ${gameState.gold}`}
-            fontSize={16}
-            fill="#FF69B4"
-            fontFamily="Arial"
-          />
-          <Text
-            x={20}
-            y={70}
-            text={`🌊 波数: ${gameState.wave + 1}/${WAVE_CONFIGS.length}`}
-            fontSize={16}
-            fill="#FF69B4"
-            fontFamily="Arial"
-          />
           {gameState.monsters.map((monster) => (
             <MonsterComponent key={monster.id} monster={monster} />
           ))}
@@ -178,6 +133,11 @@ const Game: React.FC = () => {
               />
             </Group>
           )}
+          <InfoPanel
+            playerHealth={gameState.playerHealth}
+            gold={gameState.gold}
+            wave={gameState.wave}
+          />
           <TowerSelector onDragStart={handleDragStart} />
         </Layer>
       </Stage>

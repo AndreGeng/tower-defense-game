@@ -71,7 +71,8 @@ export const useTowerDrag = ({
     // 检查位置是否有效
     const isOnPath = path.some(
       (point) =>
-        Math.abs(point.x - x) < GRID_SIZE && Math.abs(point.y - y) < GRID_SIZE,
+        getLeftOrTopBoundary(point.x) === getLeftOrTopBoundary(x) &&
+        getLeftOrTopBoundary(point.y) === getLeftOrTopBoundary(y),
     );
 
     const hasTower = gameState.towers.some(
