@@ -1,16 +1,26 @@
-import React, { useState } from "react";
-import { Stage, Layer, Rect, Line, Text, Circle, Group } from "react-konva";
-import type { GameState, TowerVariantType } from "../types/game";
+import React from "react";
+import { Stage, Layer, Rect, Line, Text } from "react-konva";
+import type { GameState } from "../types/game";
 import MonsterComponent from "./Monster";
 import TowerComponent from "./Tower";
 import GameOverModal from "./GameOverModal";
 import { useGameManager } from "../hooks/useGameManager";
-import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "../game/constants";
+import {
+  GRID_SIZE,
+  GAME_WIDTH,
+  GAME_HEIGHT,
+  INFO_PANEL_WIDTH,
+  INFO_PANEL_HEIGHT,
+  INFO_PANEL_OFFSET_X,
+  INFO_PANEL_OFFSET_Y,
+} from "../game/constants";
 import { WAVE_CONFIGS } from "../game/configs";
+import { useTowerDrag } from "../hooks/useTowerDrag";
+import { Group, Circle } from "react-konva";
 
 const initialGameState: GameState = {
   playerHealth: 10,
-  gold: 100,
+  gold: 500,
   wave: 0,
   monstersToSpawn: prepareWaveMonsters(0),
   lastSpawnTime: 0,
@@ -20,11 +30,16 @@ const initialGameState: GameState = {
 };
 
 import TowerSelector from "./TowerSelector";
-import type { TowerOption } from "./TowerSelector";
 import { prepareWaveMonsters } from "../game/utils";
 
 const Game: React.FC = () => {
   const { gameState, path, setGameState } = useGameManager(initialGameState);
+  const { dragTower, handleDragStart, handleMouseMove, handleMouseUp } =
+    useTowerDrag({
+      gameState,
+      setGameState,
+      path,
+    });
 
   // 渲染路径
   const renderPath = () => {
@@ -79,79 +94,10 @@ const Game: React.FC = () => {
     return gridLines;
   };
 
-  const [dragTower, setDragTower] = useState<{
-    type: TowerVariantType;
-    cost: number;
-    range: number;
-    x: number;
-    y: number;
-  } | null>(null);
-
-  const handleTowerDragStart = (tower: TowerOption) => {
-    if (gameState.gold < tower.cost) {
-      return;
-    }
-    setDragTower({
-      ...tower,
-      x: 0,
-      y: 0,
-    });
-  };
-
-  const handleMouseMove = (e: any) => {
-    if (!dragTower) return;
-
-    const stage = e.target.getStage();
-    const pos = stage.getPointerPosition();
-    const x = Math.floor(pos.x / GRID_SIZE) * GRID_SIZE;
-    const y = Math.floor(pos.y / GRID_SIZE) * GRID_SIZE;
-
-    setDragTower({
-      ...dragTower,
-      x,
-      y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    if (!dragTower) return;
-
-    // 检查是否有足够的金币
-    if (gameState.gold < dragTower.cost) {
-      setDragTower(null);
-      return;
-    }
-
-    // 添加新的防御塔
-    const newTower = {
-      id: Date.now(),
-      type: dragTower.type,
-      position: { x: dragTower.x, y: dragTower.y },
-      damage: dragTower.type === "NORMAL" ? 10 : 5,
-      attackSpeed: 1,
-      range: dragTower.range,
-      cost: dragTower.cost,
-      specialEffect:
-        dragTower.type === "SLOW"
-          ? { type: "slow" as const, value: 0.5, duration: 1000 }
-          : undefined,
-    };
-
-    setGameState((prev) => ({
-      ...prev,
-      towers: [...prev.towers, newTower],
-      gold: prev.gold - dragTower.cost,
-    }));
-
-    setDragTower(null);
-  };
-
   return (
     <div
       className="mx-auto box-content w-[800px] border-2 border-pink-200 relative rounded-lg overflow-hidden"
-      style={{
-        height: `${GAME_HEIGHT}px`,
-      }}
+      style={{ height: `${GAME_HEIGHT}px` }}
     >
       <Stage
         width={GAME_WIDTH}
@@ -171,10 +117,10 @@ const Game: React.FC = () => {
           {renderPath()}
           {/* 状态栏背景 */}
           <Rect
-            x={10}
-            y={10}
-            width={200}
-            height={80}
+            x={INFO_PANEL_OFFSET_X}
+            y={INFO_PANEL_OFFSET_Y}
+            width={INFO_PANEL_WIDTH}
+            height={INFO_PANEL_HEIGHT}
             fill="#FFF0F5"
             cornerRadius={8}
             shadowColor="#FFB6C1"
@@ -212,32 +158,27 @@ const Game: React.FC = () => {
           {gameState.towers.map((tower) => (
             <TowerComponent key={tower.id} tower={tower} />
           ))}
-
-          {/* 拖拽时显示攻击范围 */}
           {dragTower && (
-            <>
+            <Group x={dragTower.x} y={dragTower.y}>
+              {/* 攻击范围预览 */}
               <Circle
-                x={dragTower.x + 20}
-                y={dragTower.y + 20}
                 radius={dragTower.range}
-                fill="rgba(255, 182, 193, 0.2)"
-                stroke="#FFB6C1"
-                strokeWidth={1}
-                dash={[5, 5]}
+                fill={dragTower.isValidPosition ? "#90EE90" : "#FFB6C1"}
+                opacity={0.2}
               />
-              <Group>
-                <Circle
-                  x={dragTower.x + 20}
-                  y={dragTower.y + 20}
-                  radius={20}
-                  fill={dragTower.type === "NORMAL" ? "#FFB6C1" : "#DDA0DD"}
-                  opacity={0.6}
-                />
-              </Group>
-            </>
+              {/* 半透明的塔预览 */}
+              <Text
+                text={dragTower.emoji}
+                fontSize={30}
+                align="center"
+                width={GRID_SIZE}
+                height={GRID_SIZE}
+                opacity={0.6}
+                verticalAlign="middle"
+              />
+            </Group>
           )}
-
-          <TowerSelector onDragStart={handleTowerDragStart} />
+          <TowerSelector onDragStart={handleDragStart} />
         </Layer>
       </Stage>
       <GameOverModal gameState={gameState} />
