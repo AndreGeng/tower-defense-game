@@ -1,7 +1,5 @@
 import { Rect, Text, Group } from "react-konva";
 import {
-  GAME_WIDTH,
-  GAME_HEIGHT,
   INFO_PANEL_WIDTH,
   INFO_PANEL_HEIGHT,
   INFO_PANEL_OFFSET_X,

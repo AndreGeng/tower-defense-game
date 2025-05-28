@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import type { GameState, Monster } from "../types/game";
+import type { GameState, Monster, Bullet, Tower } from "../types/game";
 import { generatePath } from "../game/path";
 import type { PathPoint } from "../game/path";
-import { WAVE_CONFIGS } from "../game/configs";
+import { NORMAL_TOWER, SLOW_TOWER, WAVE_CONFIGS } from "../game/configs";
+import { GRID_SIZE } from "../game/constants";
 import {
   calculateNewPosition,
   findTargetMonster,
@@ -40,7 +41,10 @@ export const useGameManager = (initialState: GameState) => {
 
       return {
         ...prevState,
-        monsters: [...prevState.monsters, newMonster],
+        monsterMap: {
+          ...prevState.monsterMap,
+          [newMonster.id]: newMonster,
+        },
         monstersToSpawn: monstersToSpawn.slice(1),
         lastSpawnTime: currentTime,
       };
@@ -50,8 +54,9 @@ export const useGameManager = (initialState: GameState) => {
   const updateMonsters = useCallback(() => {
     setGameState((prevState) => {
       let healthLoss = 0;
-      const updatedMonsters = prevState.monsters
-        .map((monster) => {
+      const updatedMonsterMap = Object.keys(prevState.monsterMap).reduce(
+        (acc, monsterId) => {
+          const monster = prevState.monsterMap[monsterId];
           const newPosition = calculateNewPosition(monster, path);
 
           // 检查是否到达终点
@@ -60,18 +65,23 @@ export const useGameManager = (initialState: GameState) => {
             Math.abs(newPosition.y - END_POINT.y) < monster.height
           ) {
             healthLoss += monster.damage;
-            return null;
+            return acc;
           }
 
           return {
-            ...monster,
-            position: newPosition,
+            ...acc,
+            [monsterId]: {
+              ...monster,
+              position: newPosition,
+            },
           };
-        })
-        .filter(Boolean) as Monster[];
+        },
+        {} as Record<string, Monster>,
+      );
+
       return {
         ...prevState,
-        monsters: updatedMonsters,
+        monsterMap: updatedMonsterMap,
         playerHealth: prevState.playerHealth - healthLoss,
       };
     });
@@ -79,25 +89,132 @@ export const useGameManager = (initialState: GameState) => {
   // 处理塔的攻击
   const handleTowerAttacks = useCallback(() => {
     setGameState((prevState) => {
-      const updatedMonsters = [...prevState.monsters];
-
-      prevState.towers.forEach((tower) => {
-        // 找到塔攻击范围内的怪物
-        const targetMonster = findTargetMonster(tower, updatedMonsters);
-        if (targetMonster) {
-          // 对怪物造成伤害
-          targetMonster.hp -= tower.damage;
-          // 应用特殊效果
-          if (tower.specialEffect?.type === "slow") {
-            targetMonster.slowEffect = tower.specialEffect.value;
-          }
+      const attackedTowerList: number[] = [];
+      const monsterDamageMap: Record<
+        string,
+        {
+          damage: number;
         }
-      });
+      > = {};
+
+      // 处理塔的攻击
+      const newBulletMap = Object.keys(prevState.towerMap).reduce(
+        (acc, towerId) => {
+          const tower = prevState.towerMap[towerId];
+          if (Date.now() - tower.lastAttackTime < tower.attackInterval) {
+            return acc;
+          }
+          attackedTowerList.push(tower.id);
+          // 找到塔攻击范围内的怪物
+          const targetMonster = findTargetMonster(
+            tower,
+            Object.keys(prevState.monsterMap).map(
+              (id) => prevState.monsterMap[id],
+            ),
+          );
+          if (targetMonster) {
+            const id = getId();
+            // 创建新的子弹
+            acc[id] = {
+              id,
+              position: {
+                x: tower.position.x + GRID_SIZE / 2,
+                y: tower.position.y + GRID_SIZE / 2,
+              },
+              targetMonsterId: targetMonster.id,
+              damage: tower.damage,
+              speed:
+                tower.type === "NORMAL" ? NORMAL_TOWER.SPEED : SLOW_TOWER.SPEED,
+              towerId: Number(towerId),
+            };
+          }
+          return acc;
+        },
+        {} as Record<string, Bullet>,
+      );
+
+      // 更新子弹位置
+      const remainingBulletMap = Object.keys(prevState.bulletMap).reduce(
+        (acc, bulletId) => {
+          const bullet = prevState.bulletMap[bulletId];
+          const targetMonster = prevState.monsterMap[bullet.targetMonsterId];
+          if (!targetMonster) {
+            return acc;
+          }
+          // 计算子弹到目标的方向
+          const dx = targetMonster.position.x - bullet.position.x;
+          const dy = targetMonster.position.y - bullet.position.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          // 如果子弹击中目标
+          if (distance < 10) {
+            // 对怪物造成伤害
+            monsterDamageMap[bullet.targetMonsterId] = {
+              damage:
+                (monsterDamageMap[bullet.targetMonsterId]?.damage || 0) +
+                bullet.damage,
+            };
+            // 应用特殊效果
+            // if (bullet.tower.specialEffect?.type === "slow") {
+            //   bullet.targetMonster.slowEffect = bullet.tower.specialEffect.value;
+            // }
+            return acc;
+          }
+
+          // 更新子弹位置
+          const speed = bullet.speed;
+          acc[bulletId] = {
+            ...bullet,
+            position: {
+              x: bullet.position.x + (dx / distance) * speed,
+              y: bullet.position.y + (dy / distance) * speed,
+            },
+          };
+          return acc;
+        },
+        {} as Record<string, Bullet>,
+      );
 
       return {
         ...prevState,
+        bulletMap: {
+          ...remainingBulletMap,
+          ...newBulletMap,
+        },
         // 移除死亡的怪物
-        monsters: updatedMonsters.filter((monster) => monster.hp > 0),
+        monsterMap: Object.keys(prevState.monsterMap).reduce(
+          (acc, monsterId) => {
+            const monster = prevState.monsterMap[monsterId];
+            if (!monsterDamageMap[monsterId]) {
+              acc[monsterId] = monster;
+              return acc;
+            }
+            const newHp = monster.hp - monsterDamageMap[monsterId].damage;
+            if (newHp > 0) {
+              acc[monsterId] = {
+                ...monster,
+                hp: newHp,
+              };
+            }
+            return acc;
+          },
+          {} as Record<string, Monster>,
+        ),
+        towerMap: Object.keys(prevState.towerMap).reduce(
+          (acc, towerId) => {
+            const tower = prevState.towerMap[towerId];
+            if (attackedTowerList.includes(Number(towerId))) {
+              acc[towerId] = {
+                ...tower,
+                lastAttackTime: Date.now(),
+              };
+              return acc;
+            }
+            acc[towerId] = tower;
+            return acc;
+          },
+          {} as Record<string, Tower>,
+        ),
       };
     });
   }, []);
@@ -113,7 +230,7 @@ export const useGameManager = (initialState: GameState) => {
       }
       if (
         prevState.monstersToSpawn.length === 0 &&
-        prevState.monsters.length === 0
+        Object.keys(prevState.monsterMap).length === 0
       ) {
         if (prevState.wave < WAVE_CONFIGS.length - 1) {
           startNewWave();

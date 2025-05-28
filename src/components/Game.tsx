@@ -6,18 +6,21 @@ import TowerComponent from "./Tower";
 import GameOverModal from "./GameOverModal";
 import { useGameManager } from "../hooks/useGameManager";
 import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "../game/constants";
+import { INITIAL_PLAYER_HEALTH, INITIAL_GOLD } from "../game/configs";
 import { useTowerDrag } from "../hooks/useTowerDrag";
 import { InfoPanel } from "./InfoPanel";
 import { useTowerImg } from "../hooks/useTowerImg";
+import Bullet from "./Bullet";
 
 const initialGameState: GameState = {
-  playerHealth: 10,
-  gold: 500,
+  playerHealth: INITIAL_PLAYER_HEALTH,
+  gold: INITIAL_GOLD,
   wave: 0,
   monstersToSpawn: prepareWaveMonsters(0),
   lastSpawnTime: 0,
-  monsters: [],
-  towers: [],
+  monsterMap: {},
+  towerMap: {},
+  bulletMap: {},
   gameStatus: "playing",
 };
 
@@ -108,12 +111,14 @@ const Game: React.FC = () => {
           />
           {renderGrid()}
           {renderPath()}
-          {gameState.monsters.map((monster) => (
-            <MonsterComponent key={monster.id} monster={monster} />
-          ))}
-          {gameState.towers.map((tower) => (
-            <TowerComponent key={tower.id} tower={tower} />
-          ))}
+          {Object.keys(gameState.monsterMap).map((monsterId) => {
+            const monster = gameState.monsterMap[monsterId];
+            return <MonsterComponent key={monster.id} monster={monster} />;
+          })}
+          {Object.keys(gameState.towerMap).map((towerId) => {
+            const tower = gameState.towerMap[towerId];
+            return <TowerComponent key={tower.id} tower={tower} />;
+          })}
           {dragTower && (
             <Group x={dragTower.x} y={dragTower.y}>
               {/* 攻击范围预览 */}
@@ -139,6 +144,16 @@ const Game: React.FC = () => {
             wave={gameState.wave}
           />
           <TowerSelector onDragStart={handleDragStart} />
+        </Layer>
+        <Layer>
+          {/*在 Layer 中添加子弹渲染*/}
+          {Object.keys(gameState.bulletMap).map((bulletId) => {
+            const bullet = gameState.bulletMap[bulletId];
+            const tower = gameState.towerMap[bullet.towerId];
+            return (
+              <Bullet key={bullet.id} bullet={bullet} towerType={tower.type} />
+            );
+          })}
         </Layer>
       </Stage>
       <GameOverModal gameState={gameState} />

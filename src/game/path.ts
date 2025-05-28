@@ -1,5 +1,5 @@
 import type { Position } from "../types/game";
-import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "./constants";
+import { GRID_SIZE } from "./constants";
 
 export interface PathPoint extends Position {
   direction: "right" | "down" | "left" | "up";

@@ -16,6 +16,7 @@ import {
   TOWER_PANEL_HEIGHT,
 } from "../game/constants";
 import type { PathPoint } from "../game/path";
+import { NORMAL_TOWER, SLOW_TOWER } from "../game/configs";
 
 interface DragTower extends TowerOption {
   x: number;
@@ -75,9 +76,10 @@ export const useTowerDrag = ({
         getLeftOrTopBoundary(point.y) === getLeftOrTopBoundary(y),
     );
 
-    const hasTower = gameState.towers.some(
-      (tower) => tower.position.x === x && tower.position.y === y,
-    );
+    const hasTower = Object.keys(gameState.towerMap).some((towerId) => {
+      const tower = gameState.towerMap[towerId];
+      return tower.position.x === x && tower.position.y === y;
+    });
 
     // 简化位置判断逻辑
     const isInCanvas =
@@ -120,13 +122,19 @@ export const useTowerDrag = ({
 
     // 只在有效位置时才放置塔
     if (dragTower.isValidPosition) {
+      const newId = Date.now();
       // 添加新的防御塔
       const newTower = {
-        id: Date.now(),
+        id: newId,
         type: dragTower.type,
         position: { x: dragTower.x, y: dragTower.y },
-        damage: dragTower.type === "NORMAL" ? 10 : 5,
-        attackSpeed: 1,
+        damage:
+          dragTower.type === "NORMAL" ? NORMAL_TOWER.DAMAGE : SLOW_TOWER.DAMAGE,
+        attackInterval:
+          dragTower.type === "NORMAL"
+            ? NORMAL_TOWER.ATTACK_INTERVAL
+            : SLOW_TOWER.ATTACK_INTERVAL,
+        lastAttackTime: 0,
         range: dragTower.range,
         cost: dragTower.cost,
         specialEffect:
@@ -137,7 +145,10 @@ export const useTowerDrag = ({
 
       setGameState((prev) => ({
         ...prev,
-        towers: [...prev.towers, newTower],
+        towerMap: {
+          ...prev.towerMap,
+          [newId]: newTower,
+        },
         gold: prev.gold - dragTower.cost,
       }));
     }

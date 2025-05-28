@@ -32,9 +32,10 @@ export interface Tower {
   type: TowerVariantType;
   position: Position;
   damage: number;
-  attackSpeed: number;
   range: number;
   cost: number;
+  attackInterval: number;
+  lastAttackTime: number;
   specialEffect?: {
     type: "slow";
     value: number;
@@ -43,13 +44,25 @@ export interface Tower {
 }
 
 // 游戏状态
+// 子弹类型定义
+export interface Bullet {
+  id: number;
+  position: Position;
+  targetMonsterId: number;
+  damage: number;
+  speed: number;
+  towerId: number;
+}
+
+// 在 GameState 中添加子弹数组
 export interface GameState {
   playerHealth: number;
   gold: number;
   wave: number;
-  monstersToSpawn: Omit<Monster, "id" | "position">[];
   lastSpawnTime: number;
-  monsters: Monster[];
-  towers: Tower[];
   gameStatus: "playing" | "won" | "lost";
+  monstersToSpawn: Omit<Monster, "id" | "position">[];
+  monsterMap: Record<string, Monster>;
+  towerMap: Record<string, Tower>;
+  bulletMap: Record<string, Bullet>;
 }
