@@ -1,5 +1,5 @@
 import React from "react";
-import { Group, Rect, Text } from "react-konva";
+import { Group, Rect, Text, Image } from "react-konva";
 import type { TowerVariantType } from "../types/game";
 import {
   TOWER_PANEL_WIDTH,
@@ -7,18 +7,18 @@ import {
   TOWER_PANEL_OFFSET_X,
   TOWER_PANEL_OFFSET_Y,
 } from "../game/constants";
+import { useTowerImg } from "../hooks/useTowerImg";
 
 export interface TowerOption {
   type: TowerVariantType;
   cost: number;
   range: number;
-  emoji: string; // 添加 emoji 属性
   label: string;
 }
 
 const TOWER_OPTIONS: TowerOption[] = [
-  { type: "NORMAL", cost: 100, range: 120, emoji: "🎯", label: "老爸" }, // 普通塔用靶心表示
-  { type: "SLOW", cost: 150, range: 100, emoji: "❄️", label: "老妈" }, // 减速塔用雪花表示
+  { type: "NORMAL", cost: 100, range: 120, label: "老爸" }, // 普通塔用靶心表示
+  { type: "SLOW", cost: 150, range: 100, label: "老妈" }, // 减速塔用雪花表示
 ];
 
 interface Props {
@@ -26,6 +26,7 @@ interface Props {
 }
 
 const TowerSelector: React.FC<Props> = ({ onDragStart }) => {
+  const towerAssetMap = useTowerImg();
   return (
     <Group x={TOWER_PANEL_OFFSET_X} y={TOWER_PANEL_OFFSET_Y}>
       {/* 面板背景 */}
@@ -55,9 +56,16 @@ const TowerSelector: React.FC<Props> = ({ onDragStart }) => {
           y={index * 25}
           onMouseDown={() => onDragStart(tower)}
         >
+          <Image
+            y={30}
+            image={towerAssetMap[tower.type]}
+            width={20}
+            height={20}
+          />
           <Text
+            x={20}
             y={35}
-            text={`${tower.emoji} ${tower.label}(${tower.cost}💰)`}
+            text={`${tower.label}(${tower.cost}💰)`}
             fontSize={16}
             fill="#FF69B4"
             align="center"

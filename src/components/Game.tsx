@@ -1,5 +1,5 @@
 import React from "react";
-import { Stage, Layer, Rect, Line, Text } from "react-konva";
+import { Group, Circle, Stage, Layer, Rect, Line, Image } from "react-konva";
 import type { GameState } from "../types/game";
 import MonsterComponent from "./Monster";
 import TowerComponent from "./Tower";
@@ -8,7 +8,7 @@ import { useGameManager } from "../hooks/useGameManager";
 import { GRID_SIZE, GAME_WIDTH, GAME_HEIGHT } from "../game/constants";
 import { useTowerDrag } from "../hooks/useTowerDrag";
 import { InfoPanel } from "./InfoPanel";
-import { Group, Circle } from "react-konva";
+import { useTowerImg } from "../hooks/useTowerImg";
 
 const initialGameState: GameState = {
   playerHealth: 10,
@@ -32,6 +32,7 @@ const Game: React.FC = () => {
       setGameState,
       path,
     });
+  const towerAssetMap = useTowerImg();
 
   // 渲染路径
   const renderPath = () => {
@@ -117,19 +118,18 @@ const Game: React.FC = () => {
             <Group x={dragTower.x} y={dragTower.y}>
               {/* 攻击范围预览 */}
               <Circle
+                x={GRID_SIZE / 2}
+                y={GRID_SIZE / 2}
                 radius={dragTower.range}
                 fill={dragTower.isValidPosition ? "#90EE90" : "#FFB6C1"}
                 opacity={0.2}
               />
               {/* 半透明的塔预览 */}
-              <Text
-                text={dragTower.emoji}
-                fontSize={30}
-                align="center"
+              <Image
+                image={towerAssetMap[dragTower.type]}
                 width={GRID_SIZE}
                 height={GRID_SIZE}
                 opacity={0.6}
-                verticalAlign="middle"
               />
             </Group>
           )}
