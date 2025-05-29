@@ -13,7 +13,7 @@ export const INITIAL_PLAYER_HEALTH = 10;
 export const INITIAL_GOLD = 500;
 
 // 怪物相关常量
-export const MONSTER_SPAWN_INTERVAL = 2000;
+export const MONSTER_SPAWN_INTERVAL = 1000;
 
 // 怪物属性常量
 export const NORMAL_MONSTER = {
@@ -33,11 +33,13 @@ export const NORMAL_TOWER = {
   ATTACK_INTERVAL: 300,
   SPEED: 3,
   DAMAGE: 10,
+  GOLD: 10,
 };
 export const SLOW_TOWER = {
   ATTACK_INTERVAL: 500,
   SPEED: 3,
   DAMAGE: 40,
+  GOLD: 50,
 };
 
 export const WAVE_CONFIGS: WaveConfig[] = [
@@ -61,5 +63,26 @@ export const WAVE_CONFIGS: WaveConfig[] = [
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL,
+  },
+  {
+    monsters: [
+      {
+        count: 20,
+        hp: NORMAL_MONSTER.HP,
+        speed: NORMAL_MONSTER.SPEED,
+        damage: NORMAL_MONSTER.DAMAGE,
+        width: MONSTER_WIDTH,
+        height: MONSTER_HEIGHT,
+      },
+      {
+        count: 40,
+        hp: ELITE_MONSTER.HP,
+        speed: ELITE_MONSTER.SPEED,
+        damage: ELITE_MONSTER.DAMAGE,
+        width: MONSTER_WIDTH,
+        height: MONSTER_HEIGHT,
+      },
+    ],
+    interval: MONSTER_SPAWN_INTERVAL / 2,
   },
 ];

@@ -28,13 +28,13 @@ export const useGameManager = (
   // 生成怪物
   const spawnMonster = useCallback(() => {
     setGameState((prevState) => {
-      const { monstersToSpawn, lastSpawnTime } = prevState;
+      const { monstersToSpawn, lastSpawnTime, wave } = prevState;
       if (monstersToSpawn.length === 0) return prevState;
 
       const currentTime = Date.now();
 
       // 使用时间差绝对值判断
-      if (currentTime - lastSpawnTime < 2000) {
+      if (currentTime - lastSpawnTime < WAVE_CONFIGS[wave].interval) {
         return prevState;
       }
 
@@ -241,7 +241,7 @@ export const useGameManager = (
         Object.keys(prevState.monsterMap).length === 0
       ) {
         if (prevState.wave < WAVE_CONFIGS.length - 1) {
-          startNewWave();
+          return startNewWave(prevState);
         } else {
           playVictory(); // 播放胜利音效
           return {
@@ -254,12 +254,12 @@ export const useGameManager = (
     });
   }, [playVictory, playDeath]);
   // 开始新的波次
-  const startNewWave = () => {
-    setGameState((prev) => ({
+  const startNewWave = (prev: GameState) => {
+    return {
       ...prev,
       wave: prev.wave + 1,
       monstersToSpawn: prepareWaveMonsters(prev.wave + 1),
-    }));
+    };
   };
 
   // 游戏主循环

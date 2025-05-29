@@ -116,5 +116,5 @@ export const prepareWaveMonsters = (waveIndex: number) => {
     }
   });
 
-  return monsters;
+  return monsters.sort(() => Math.random() - 0.5);
 };
