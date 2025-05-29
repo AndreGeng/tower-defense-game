@@ -112,6 +112,7 @@ export const prepareWaveMonsters = (waveIndex: number) => {
         height: config.height,
         slowEffect: 1,
         pathIndex: 0,
+        gold: config.gold,
       });
     }
   });

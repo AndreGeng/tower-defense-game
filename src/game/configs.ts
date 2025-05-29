@@ -2,7 +2,10 @@ import type { Monster } from "../types/game";
 import { MONSTER_WIDTH, MONSTER_HEIGHT } from "./constants";
 
 export interface WaveConfig {
-  monsters: (Pick<Monster, "hp" | "speed" | "damage" | "width" | "height"> & {
+  monsters: (Pick<
+    Monster,
+    "hp" | "speed" | "damage" | "gold" | "width" | "height"
+  > & {
     count: number;
   })[];
   interval: number;
@@ -20,12 +23,14 @@ export const NORMAL_MONSTER = {
   HP: 100,
   SPEED: 1,
   DAMAGE: 1,
+  GOLD: 10,
 };
 
 export const ELITE_MONSTER = {
   HP: 150,
   SPEED: 2,
   DAMAGE: 3,
+  GOLD: 50,
 };
 
 // Tower属性常量
@@ -33,13 +38,11 @@ export const NORMAL_TOWER = {
   ATTACK_INTERVAL: 300,
   SPEED: 3,
   DAMAGE: 10,
-  GOLD: 10,
 };
 export const SLOW_TOWER = {
   ATTACK_INTERVAL: 500,
   SPEED: 3,
   DAMAGE: 40,
-  GOLD: 50,
 };
 
 export const WAVE_CONFIGS: WaveConfig[] = [
@@ -50,6 +53,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         hp: NORMAL_MONSTER.HP,
         speed: NORMAL_MONSTER.SPEED,
         damage: NORMAL_MONSTER.DAMAGE,
+        gold: NORMAL_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
       },
@@ -58,6 +62,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         hp: ELITE_MONSTER.HP,
         speed: ELITE_MONSTER.SPEED,
         damage: ELITE_MONSTER.DAMAGE,
+        gold: ELITE_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
       },
@@ -71,6 +76,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         hp: NORMAL_MONSTER.HP,
         speed: NORMAL_MONSTER.SPEED,
         damage: NORMAL_MONSTER.DAMAGE,
+        gold: NORMAL_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
       },
@@ -81,6 +87,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         damage: ELITE_MONSTER.DAMAGE,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
+        gold: ELITE_MONSTER.GOLD,
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL / 2,

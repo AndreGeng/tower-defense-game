@@ -10,6 +10,7 @@ export interface Monster {
   width: number;
   height: number;
   pathIndex: number;
+  gold: number;
 }
 
 // 位置类型

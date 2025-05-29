@@ -182,31 +182,37 @@ export const useGameManager = (
         {} as Record<string, Bullet>,
       );
 
+      let goldDelta = 0;
+      const updatedMonsterMap = Object.keys(prevState.monsterMap).reduce(
+        (acc, monsterId) => {
+          const monster = prevState.monsterMap[monsterId];
+          if (!monsterDamageMap[monsterId]) {
+            acc[monsterId] = monster;
+            return acc;
+          }
+          const newHp = monster.hp - monsterDamageMap[monsterId].damage;
+          if (newHp > 0) {
+            acc[monsterId] = {
+              ...monster,
+              hp: newHp,
+            };
+          } else {
+            goldDelta += monster.gold;
+          }
+          return acc;
+        },
+        {} as Record<string, Monster>,
+      );
+
       return {
         ...prevState,
         bulletMap: {
           ...remainingBulletMap,
           ...newBulletMap,
         },
+        monsterMap: updatedMonsterMap,
+        gold: prevState.gold + goldDelta,
         // 移除死亡的怪物
-        monsterMap: Object.keys(prevState.monsterMap).reduce(
-          (acc, monsterId) => {
-            const monster = prevState.monsterMap[monsterId];
-            if (!monsterDamageMap[monsterId]) {
-              acc[monsterId] = monster;
-              return acc;
-            }
-            const newHp = monster.hp - monsterDamageMap[monsterId].damage;
-            if (newHp > 0) {
-              acc[monsterId] = {
-                ...monster,
-                hp: newHp,
-              };
-            }
-            return acc;
-          },
-          {} as Record<string, Monster>,
-        ),
         towerMap: Object.keys(prevState.towerMap).reduce(
           (acc, towerId) => {
             const tower = prevState.towerMap[towerId];
