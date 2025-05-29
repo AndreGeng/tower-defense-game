@@ -63,7 +63,7 @@ export const useGameManager = (
       const updatedMonsterMap = Object.keys(prevState.monsterMap).reduce(
         (acc, monsterId) => {
           const monster = prevState.monsterMap[monsterId];
-          const newPosition = calculateNewPosition(monster, path);
+          const [pathIndex, newPosition] = calculateNewPosition(monster, path);
 
           // 检查是否到达终点
           if (
@@ -79,6 +79,7 @@ export const useGameManager = (
             [monsterId]: {
               ...monster,
               position: newPosition,
+              pathIndex,
             },
           };
         },

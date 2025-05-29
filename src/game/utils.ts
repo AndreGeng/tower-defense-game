@@ -5,13 +5,18 @@ import { WAVE_CONFIGS } from "./configs";
 export const calculateNewPosition = (
   monster: Monster,
   path: Position[],
-): Position => {
+): [number, Position] => {
+  let currentPathIndex = 0;
   // 找到怪物当前所在的路径点索引
-  const currentPathIndex = path.findIndex((point) => {
+  for (let i = monster.pathIndex; i < path.length - 1; i++) {
+    const point = path[i];
     const dx = Math.abs(point.x - monster.position.x);
     const dy = Math.abs(point.y - monster.position.y);
-    return dx < GRID_SIZE && dy < GRID_SIZE;
-  });
+    if (dx < GRID_SIZE && dy < GRID_SIZE) {
+      currentPathIndex = i;
+      break;
+    }
+  }
 
   // 如果找不到当前位置，说明怪物刚生成，使用第一个路径点
   if (currentPathIndex === -1) {
@@ -21,18 +26,21 @@ export const calculateNewPosition = (
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < monster.speed) {
-      return firstPoint;
+      return [0, firstPoint];
     }
 
-    return {
-      x: monster.position.x + (dx / distance) * monster.speed,
-      y: monster.position.y + (dy / distance) * monster.speed,
-    };
+    return [
+      0,
+      {
+        x: monster.position.x + (dx / distance) * monster.speed,
+        y: monster.position.y + (dy / distance) * monster.speed,
+      },
+    ];
   }
 
   // 如果已经到达最后一个路径点，则保持不动
   if (currentPathIndex === path.length - 1) {
-    return monster.position;
+    return [path.length - 1, monster.position];
   }
 
   // 获取下一个路径点
@@ -45,21 +53,27 @@ export const calculateNewPosition = (
     (dx !== 0 && Math.abs(dx) < monster.speed) ||
     (dy !== 0 && Math.abs(dy) < monster.speed)
   ) {
-    return nextPoint;
+    return [currentPathIndex, nextPoint];
   }
 
   if (dx !== 0) {
-    return {
-      x: monster.position.x + (dx > 0 ? monster.speed : -monster.speed),
-      y: monster.position.y,
-    };
+    return [
+      currentPathIndex,
+      {
+        x: monster.position.x + (dx > 0 ? monster.speed : -monster.speed),
+        y: monster.position.y,
+      },
+    ];
   }
 
   // 否则按比例移动
-  return {
-    x: monster.position.x,
-    y: monster.position.y + (dy > 0 ? monster.speed : -monster.speed),
-  };
+  return [
+    currentPathIndex,
+    {
+      x: monster.position.x,
+      y: monster.position.y + (dy > 0 ? monster.speed : -monster.speed),
+    },
+  ];
 };
 
 export const findTargetMonster = (
@@ -97,6 +111,7 @@ export const prepareWaveMonsters = (waveIndex: number) => {
         width: config.width,
         height: config.height,
         slowEffect: 1,
+        pathIndex: 0,
       });
     }
   });

@@ -9,6 +9,7 @@ export interface Monster {
   slowEffect: number;
   width: number;
   height: number;
+  pathIndex: number;
 }
 
 // 位置类型
