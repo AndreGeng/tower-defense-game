@@ -1,4 +1,5 @@
 import React from "react";
+import Konva from "konva";
 import { Group, Rect, Text, Image } from "react-konva";
 import type { TowerVariantType } from "../types/game";
 import {
@@ -17,15 +18,19 @@ export interface TowerOption {
 }
 
 const TOWER_OPTIONS: TowerOption[] = [
-  { type: "NORMAL", cost: 100, range: 120, label: "老爸" }, // 普通塔用靶心表示
-  { type: "SLOW", cost: 150, range: 100, label: "老妈" }, // 减速塔用雪花表示
+  { type: "NORMAL", cost: 100, range: 120, label: "蘑菇塔" }, // 普通塔用靶心表示
+  { type: "SLOW", cost: 150, range: 100, label: "冰霜塔" }, // 减速塔用雪花表示
 ];
 
 interface Props {
-  onDragStart: (tower: TowerOption) => void;
+  onDragStart: (
+    e: Konva.KonvaEventObject<MouseEvent>,
+    tower: TowerOption,
+  ) => void;
+  isDragging: boolean;
 }
 
-const TowerSelector: React.FC<Props> = ({ onDragStart }) => {
+const TowerSelector: React.FC<Props> = ({ onDragStart, isDragging }) => {
   const towerAssetMap = useTowerImg();
   return (
     <Group x={TOWER_PANEL_OFFSET_X} y={TOWER_PANEL_OFFSET_Y}>
@@ -54,7 +59,26 @@ const TowerSelector: React.FC<Props> = ({ onDragStart }) => {
           key={tower.type}
           x={10}
           y={index * 25}
-          onMouseDown={() => onDragStart(tower)}
+          onMouseDown={(e) => onDragStart(e, tower)}
+          onMouseEnter={(e) => {
+            const stage = e.target.getStage();
+            if (!stage) {
+              return;
+            }
+            const container = stage.container();
+            container.style.cursor = "pointer";
+          }}
+          onMouseLeave={(e) => {
+            if (isDragging) {
+              return;
+            }
+            const stage = e.target.getStage();
+            if (!stage) {
+              return;
+            }
+            const container = stage.container();
+            container.style.cursor = "default";
+          }}
         >
           <Image
             y={30}

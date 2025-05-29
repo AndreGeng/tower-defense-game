@@ -13,9 +13,11 @@
     "@tailwindcss/postcss": "^4.1.7",
     "ahooks": "^3.8.4",
     "konva": "^9.3.20",
+    "normalize.css": "^8.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-konva": "^19.0.3",
+    "tailwindcss-rem-to-px": "^0.1.1",
     "use-image": "^1.1.4"
   },
   "devDependencies": {

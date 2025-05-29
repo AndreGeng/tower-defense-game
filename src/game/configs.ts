@@ -25,7 +25,7 @@ export const NORMAL_MONSTER = {
 export const ELITE_MONSTER = {
   HP: 150,
   SPEED: 2,
-  DAMAGE: 2,
+  DAMAGE: 3,
 };
 
 // Tower属性常量
@@ -37,7 +37,7 @@ export const NORMAL_TOWER = {
 export const SLOW_TOWER = {
   ATTACK_INTERVAL: 500,
   SPEED: 3,
-  DAMAGE: 20,
+  DAMAGE: 40,
 };
 
 export const WAVE_CONFIGS: WaveConfig[] = [

@@ -11,6 +11,7 @@ import { useTowerDrag } from "../hooks/useTowerDrag";
 import { InfoPanel } from "./InfoPanel";
 import { useTowerImg } from "../hooks/useTowerImg";
 import Bullet from "./Bullet";
+import { useBackgroundMusic } from "../hooks/useBackgroundMusic";
 
 const initialGameState: GameState = {
   playerHealth: INITIAL_PLAYER_HEALTH,
@@ -28,7 +29,12 @@ import TowerSelector from "./TowerSelector";
 import { prepareWaveMonsters } from "../game/utils";
 
 const Game: React.FC = () => {
-  const { gameState, path, setGameState } = useGameManager(initialGameState);
+  const { isPlaying, toggleMusic, playVictory, playDeath } =
+    useBackgroundMusic();
+  const { gameState, path, setGameState } = useGameManager(initialGameState, {
+    playVictory,
+    playDeath,
+  });
   const { dragTower, handleDragStart, handleMouseMove, handleMouseUp } =
     useTowerDrag({
       gameState,
@@ -143,7 +149,10 @@ const Game: React.FC = () => {
             gold={gameState.gold}
             wave={gameState.wave}
           />
-          <TowerSelector onDragStart={handleDragStart} />
+          <TowerSelector
+            onDragStart={handleDragStart}
+            isDragging={Boolean(dragTower)}
+          />
         </Layer>
         <Layer>
           {/*在 Layer 中添加子弹渲染*/}
@@ -156,6 +165,14 @@ const Game: React.FC = () => {
           })}
         </Layer>
       </Stage>
+      {/* 添加音乐控制按钮 */}
+      <button
+        onClick={toggleMusic}
+        className="absolute cursor-pointer top-4 right-4 !bg-pink-100 !hover:bg-pink-200 rounded-xl p-2 shadow-md transition-colors duration-200"
+        style={{ width: "40px", height: "40px" }}
+      >
+        {isPlaying ? "🔊" : "🔇"}
+      </button>
       <GameOverModal gameState={gameState} />
     </div>
   );

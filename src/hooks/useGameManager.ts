@@ -12,7 +12,13 @@ import {
 } from "../game/utils";
 
 // 游戏管理器
-export const useGameManager = (initialState: GameState) => {
+export const useGameManager = (
+  initialState: GameState,
+  {
+    playVictory,
+    playDeath,
+  }: { playVictory: () => void; playDeath: () => void },
+) => {
   const [gameState, setGameState] = useState<GameState>(initialState);
   // 添加路径状态
   const [path] = useState<PathPoint[]>(generatePath());
@@ -223,6 +229,7 @@ export const useGameManager = (initialState: GameState) => {
   const checkGameStatus = useCallback(() => {
     setGameState((prevState) => {
       if (prevState.playerHealth <= 0) {
+        playDeath(); // 播放失败音效
         return {
           ...prevState,
           gameStatus: "lost",
@@ -235,16 +242,16 @@ export const useGameManager = (initialState: GameState) => {
         if (prevState.wave < WAVE_CONFIGS.length - 1) {
           startNewWave();
         } else {
+          playVictory(); // 播放胜利音效
           return {
             ...prevState,
             gameStatus: "won",
           };
         }
       }
-      // 这里可以添加胜利条件的检查
       return prevState;
     });
-  }, []);
+  }, [playVictory, playDeath]);
   // 开始新的波次
   const startNewWave = () => {
     setGameState((prev) => ({
@@ -263,7 +270,7 @@ export const useGameManager = (initialState: GameState) => {
     // 处理塔的攻击
     handleTowerAttacks();
     // 检查游戏状态
-    // checkGameStatus();
+    checkGameStatus();
   }, [spawnMonster, updateMonsters, checkGameStatus, handleTowerAttacks]);
 
   useEffect(() => {

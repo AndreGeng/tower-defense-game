@@ -44,9 +44,16 @@ export const useTowerDrag = ({
 }: UseTowerDragProps) => {
   const [dragTower, setDragTower] = useState<DragTower | null>(null);
 
-  const handleDragStart = (tower: TowerOption) => {
+  const handleDragStart = (
+    e: Konva.KonvaEventObject<MouseEvent>,
+    tower: TowerOption,
+  ) => {
     if (gameState.gold < tower.cost) {
       return;
+    }
+    const stage = e.target.getStage();
+    if (stage) {
+      stage.container().style.cursor = "pointer";
     }
     setDragTower({
       ...tower,
@@ -111,7 +118,11 @@ export const useTowerDrag = ({
     });
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    const stage = e.target.getStage();
+    if (stage) {
+      stage.container().style.cursor = "default";
+    }
     if (!dragTower) return;
 
     // 检查是否有足够的金币
