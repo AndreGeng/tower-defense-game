@@ -1,6 +1,7 @@
 // 怪物类型定义
 export interface Monster {
   id: number;
+  type: "NORMAL" | "ELITE";
   hp: number;
   maxHp: number;
   speed: number;

@@ -5,7 +5,7 @@ import { MONSTER_WIDTH, MONSTER_HEIGHT, GRID_SIZE } from "./constants";
 export interface WaveConfig {
   monsters: (Pick<
     Monster,
-    "hp" | "speed" | "damage" | "gold" | "width" | "height"
+    "hp" | "speed" | "damage" | "gold" | "width" | "height" | "type"
   > & {
     count: number;
   })[];
@@ -65,6 +65,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         gold: NORMAL_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
+        type: "NORMAL",
       },
       {
         count: 2,
@@ -74,6 +75,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         gold: ELITE_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
+        type: "ELITE",
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL,
@@ -88,6 +90,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         gold: NORMAL_MONSTER.GOLD,
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
+        type: "NORMAL",
       },
       {
         count: 40,
@@ -97,6 +100,7 @@ export const WAVE_CONFIGS: WaveConfig[] = [
         width: MONSTER_WIDTH,
         height: MONSTER_HEIGHT,
         gold: ELITE_MONSTER.GOLD,
+        type: "ELITE",
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL / 2,

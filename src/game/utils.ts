@@ -104,6 +104,7 @@ export const prepareWaveMonsters = (waveIndex: number) => {
   wave.monsters.forEach((config) => {
     for (let i = 0; i < config.count; i++) {
       monsters.push({
+        type: config.type,
         hp: config.hp,
         maxHp: config.hp,
         speed: config.speed,

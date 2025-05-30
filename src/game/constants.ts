@@ -6,8 +6,8 @@ export const GAME_COLUMNS = GAME_WIDTH / GRID_SIZE;
 export const GAME_ROWS = GAME_HEIGHT / GRID_SIZE;
 
 // 怪物相关常量
-export const MONSTER_WIDTH = 20;
-export const MONSTER_HEIGHT = 20;
+export const MONSTER_WIDTH = 40;
+export const MONSTER_HEIGHT = 40;
 
 // 面板相关常量
 export const INFO_PANEL_WIDTH = 150;
