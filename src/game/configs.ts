@@ -1,5 +1,6 @@
 import type { Monster } from "../types/game";
-import { MONSTER_WIDTH, MONSTER_HEIGHT } from "./constants";
+import { TowerVariant } from "../types/game";
+import { MONSTER_WIDTH, MONSTER_HEIGHT, GRID_SIZE } from "./constants";
 
 export interface WaveConfig {
   monsters: (Pick<
@@ -35,14 +36,22 @@ export const ELITE_MONSTER = {
 
 // Tower属性常量
 export const NORMAL_TOWER = {
+  TYPE: TowerVariant.NORMAL,
   ATTACK_INTERVAL: 300,
   SPEED: 3,
   DAMAGE: 10,
+  COST: 100,
+  RANGE: 2.5 * GRID_SIZE,
+  LABEL: "蘑菇塔",
 };
 export const SLOW_TOWER = {
+  TYPE: TowerVariant.SLOW,
   ATTACK_INTERVAL: 500,
   SPEED: 3,
   DAMAGE: 40,
+  COST: 150,
+  RANGE: 1.5 * GRID_SIZE,
+  LABEL: "冰霜塔",
 };
 
 export const WAVE_CONFIGS: WaveConfig[] = [

@@ -25,15 +25,20 @@ export const useBackgroundMusic = () => {
   }, [audio, isPlaying]);
 
   const playVictory = useCallback(() => {
+    if (!isPlaying) {
+      return;
+    }
     audio.pause();
     victoryAudio.play();
-  }, [audio, victoryAudio]);
+  }, [audio, victoryAudio, isPlaying]);
 
   const playDeath = useCallback(() => {
+    if (!isPlaying) {
+      return;
+    }
     audio.pause();
     deathAudio.play();
-  }, [audio, deathAudio]);
+  }, [audio, deathAudio, isPlaying]);
 
   return { isPlaying, toggleMusic, playVictory, playDeath };
 };
-

@@ -8,6 +8,7 @@ import {
   TOWER_PANEL_OFFSET_X,
   TOWER_PANEL_OFFSET_Y,
 } from "../game/constants";
+import { NORMAL_TOWER, SLOW_TOWER } from "../game/configs";
 import { useTowerImg } from "../hooks/useTowerImg";
 
 export interface TowerOption {
@@ -18,8 +19,18 @@ export interface TowerOption {
 }
 
 const TOWER_OPTIONS: TowerOption[] = [
-  { type: "NORMAL", cost: 100, range: 120, label: "蘑菇塔" }, // 普通塔用靶心表示
-  { type: "SLOW", cost: 150, range: 100, label: "冰霜塔" }, // 减速塔用雪花表示
+  {
+    type: NORMAL_TOWER.TYPE,
+    cost: NORMAL_TOWER.COST,
+    range: NORMAL_TOWER.RANGE,
+    label: NORMAL_TOWER.LABEL,
+  }, // 普通塔用靶心表示
+  {
+    type: SLOW_TOWER.TYPE,
+    cost: SLOW_TOWER.COST,
+    range: SLOW_TOWER.RANGE,
+    label: SLOW_TOWER.LABEL,
+  }, // 减速塔用雪花表示
 ];
 
 interface Props {

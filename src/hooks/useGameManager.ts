@@ -125,8 +125,8 @@ export const useGameManager = (
             acc[id] = {
               id,
               position: {
-                x: tower.position.x + GRID_SIZE / 2,
-                y: tower.position.y + GRID_SIZE / 2,
+                x: tower.position.x,
+                y: tower.position.y,
               },
               targetMonsterId: targetMonster.id,
               damage: tower.damage,

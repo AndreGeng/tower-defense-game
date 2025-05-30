@@ -138,7 +138,10 @@ export const useTowerDrag = ({
       const newTower = {
         id: newId,
         type: dragTower.type,
-        position: { x: dragTower.x, y: dragTower.y },
+        position: {
+          x: dragTower.x + GRID_SIZE / 2,
+          y: dragTower.y + GRID_SIZE / 2,
+        },
         damage:
           dragTower.type === "NORMAL" ? NORMAL_TOWER.DAMAGE : SLOW_TOWER.DAMAGE,
         attackInterval:

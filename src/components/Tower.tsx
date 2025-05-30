@@ -12,7 +12,10 @@ const Tower: React.FC<Props> = ({ tower }) => {
   const towerAssetMap = useTowerImg();
 
   return (
-    <Group x={tower.position.x} y={tower.position.y}>
+    <Group
+      x={tower.position.x - GRID_SIZE / 2}
+      y={tower.position.y - GRID_SIZE / 2}
+    >
       <Image
         image={towerAssetMap[tower.type]}
         width={GRID_SIZE}
@@ -23,4 +26,3 @@ const Tower: React.FC<Props> = ({ tower }) => {
 };
 
 export default Tower;
-
