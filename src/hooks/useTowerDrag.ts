@@ -83,7 +83,10 @@ export const useTowerDrag = ({
 
     const hasTower = Object.keys(gameState.towerMap).some((towerId) => {
       const tower = gameState.towerMap[towerId];
-      return tower.position.x === x && tower.position.y === y;
+      return (
+        tower.position.x - GRID_SIZE / 2 === x &&
+        tower.position.y - GRID_SIZE / 2 === y
+      );
     });
 
     // 简化位置判断逻辑
