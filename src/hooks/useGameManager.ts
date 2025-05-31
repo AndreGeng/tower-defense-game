@@ -1,14 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import type { GameState, Monster, Bullet, Tower } from "../types/game";
+import type {
+  GameState,
+  Monster,
+  Bullet,
+  Tower,
+  SpecialEffect,
+} from "../types/game";
 import { generatePath } from "../game/path";
 import type { PathPoint } from "../game/path";
 import { NORMAL_TOWER, SLOW_TOWER, WAVE_CONFIGS } from "../game/configs";
-import { GRID_SIZE } from "../game/constants";
 import {
   calculateNewPosition,
   findTargetMonster,
   getId,
   prepareWaveMonsters,
+  getValidSpecialEffect,
 } from "../game/utils";
 
 // 游戏管理器
@@ -80,6 +86,8 @@ export const useGameManager = (
               ...monster,
               position: newPosition,
               pathIndex,
+              // 去除已失效的特效
+              specialEffects: getValidSpecialEffect(monster.specialEffects),
             },
           };
         },
@@ -101,6 +109,7 @@ export const useGameManager = (
         string,
         {
           damage: number;
+          specialEffects: SpecialEffect[];
         }
       > = {};
 
@@ -131,7 +140,7 @@ export const useGameManager = (
               targetMonsterId: targetMonster.id,
               damage: tower.damage,
               speed:
-                tower.type === "NORMAL" ? NORMAL_TOWER.SPEED : SLOW_TOWER.SPEED,
+                tower.type === "NORMAL" ? NORMAL_TOWER.speed : SLOW_TOWER.speed,
               towerId: Number(towerId),
             };
           }
@@ -144,6 +153,7 @@ export const useGameManager = (
       const remainingBulletMap = Object.keys(prevState.bulletMap).reduce(
         (acc, bulletId) => {
           const bullet = prevState.bulletMap[bulletId];
+          const tower = prevState.towerMap[bullet.towerId];
           const targetMonster = prevState.monsterMap[bullet.targetMonsterId];
           if (!targetMonster) {
             return acc;
@@ -160,11 +170,19 @@ export const useGameManager = (
               damage:
                 (monsterDamageMap[bullet.targetMonsterId]?.damage || 0) +
                 bullet.damage,
+              specialEffects: [
+                ...(monsterDamageMap[bullet.targetMonsterId]?.specialEffects ||
+                  []),
+                ...(tower.specialEffect
+                  ? [
+                      {
+                        ...tower.specialEffect,
+                        applyTime: Date.now(),
+                      },
+                    ]
+                  : []),
+              ],
             };
-            // 应用特殊效果
-            // if (bullet.tower.specialEffect?.type === "slow") {
-            //   bullet.targetMonster.slowEffect = bullet.tower.specialEffect.value;
-            // }
             return acc;
           }
 
@@ -195,6 +213,7 @@ export const useGameManager = (
             acc[monsterId] = {
               ...monster,
               hp: newHp,
+              specialEffects: monsterDamageMap[monsterId].specialEffects,
             };
           } else {
             goldDelta += monster.gold;
@@ -272,10 +291,10 @@ export const useGameManager = (
   const main = useCallback(() => {
     // 生成新的怪物
     spawnMonster();
-    // 更新怪物位置和状态
-    updateMonsters();
     // 处理塔的攻击
     handleTowerAttacks();
+    // 更新怪物位置和状态
+    updateMonsters();
     // 检查游戏状态
     checkGameStatus();
   }, [spawnMonster, updateMonsters, checkGameStatus, handleTowerAttacks]);

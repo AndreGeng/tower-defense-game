@@ -1,4 +1,4 @@
-import type { Monster } from "../types/game";
+import type { Monster, Tower } from "../types/game";
 import { TowerVariant } from "../types/game";
 import { MONSTER_WIDTH, MONSTER_HEIGHT, GRID_SIZE } from "./constants";
 
@@ -21,61 +21,60 @@ export const MONSTER_SPAWN_INTERVAL = 1000;
 
 // 怪物属性常量
 export const NORMAL_MONSTER = {
-  HP: 100,
-  SPEED: 1,
-  DAMAGE: 1,
-  GOLD: 10,
-};
+  type: "NORMAL",
+  hp: 100,
+  speed: 1,
+  damage: 1,
+  gold: 10,
+  width: MONSTER_WIDTH,
+  height: MONSTER_HEIGHT,
+} as const;
 
 export const ELITE_MONSTER = {
-  HP: 150,
-  SPEED: 2,
-  DAMAGE: 3,
-  GOLD: 50,
-};
+  type: "ELITE",
+  hp: 150,
+  speed: 2,
+  damage: 3,
+  gold: 50,
+  width: MONSTER_WIDTH,
+  height: MONSTER_HEIGHT,
+} as const;
 
 // Tower属性常量
-export const NORMAL_TOWER = {
-  TYPE: TowerVariant.NORMAL,
-  ATTACK_INTERVAL: 300,
-  SPEED: 3,
-  DAMAGE: 10,
-  COST: 100,
-  RANGE: 2.5 * GRID_SIZE,
-  LABEL: "蘑菇塔",
-};
-export const SLOW_TOWER = {
-  TYPE: TowerVariant.SLOW,
-  ATTACK_INTERVAL: 500,
-  SPEED: 3,
-  DAMAGE: 40,
-  COST: 150,
-  RANGE: 1.5 * GRID_SIZE,
-  LABEL: "冰霜塔",
-};
+export const NORMAL_TOWER: Omit<Tower, "id" | "position" | "lastAttackTime"> = {
+  type: TowerVariant.NORMAL,
+  attackInterval: 300,
+  damage: 10,
+  cost: 100,
+  range: 2.5 * GRID_SIZE,
+  label: "蘑菇塔",
+  speed: 5,
+} as const;
+export const SLOW_TOWER: Omit<Tower, "id" | "position" | "lastAttackTime"> = {
+  type: TowerVariant.SLOW,
+  attackInterval: 500,
+  damage: 40,
+  cost: 150,
+  range: 1.5 * GRID_SIZE,
+  label: "冰霜塔",
+  speed: 3,
+  specialEffect: {
+    type: "SLOW",
+    value: 0.5,
+    duration: 1000,
+  },
+} as const;
 
 export const WAVE_CONFIGS: WaveConfig[] = [
   {
     monsters: [
       {
         count: 5,
-        hp: NORMAL_MONSTER.HP,
-        speed: NORMAL_MONSTER.SPEED,
-        damage: NORMAL_MONSTER.DAMAGE,
-        gold: NORMAL_MONSTER.GOLD,
-        width: MONSTER_WIDTH,
-        height: MONSTER_HEIGHT,
-        type: "NORMAL",
+        ...NORMAL_MONSTER,
       },
       {
         count: 2,
-        hp: ELITE_MONSTER.HP,
-        speed: ELITE_MONSTER.SPEED,
-        damage: ELITE_MONSTER.DAMAGE,
-        gold: ELITE_MONSTER.GOLD,
-        width: MONSTER_WIDTH,
-        height: MONSTER_HEIGHT,
-        type: "ELITE",
+        ...ELITE_MONSTER,
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL,
@@ -84,23 +83,11 @@ export const WAVE_CONFIGS: WaveConfig[] = [
     monsters: [
       {
         count: 20,
-        hp: NORMAL_MONSTER.HP,
-        speed: NORMAL_MONSTER.SPEED,
-        damage: NORMAL_MONSTER.DAMAGE,
-        gold: NORMAL_MONSTER.GOLD,
-        width: MONSTER_WIDTH,
-        height: MONSTER_HEIGHT,
-        type: "NORMAL",
+        ...NORMAL_MONSTER,
       },
       {
         count: 40,
-        hp: ELITE_MONSTER.HP,
-        speed: ELITE_MONSTER.SPEED,
-        damage: ELITE_MONSTER.DAMAGE,
-        width: MONSTER_WIDTH,
-        height: MONSTER_HEIGHT,
-        gold: ELITE_MONSTER.GOLD,
-        type: "ELITE",
+        ...ELITE_MONSTER,
       },
     ],
     interval: MONSTER_SPAWN_INTERVAL / 2,

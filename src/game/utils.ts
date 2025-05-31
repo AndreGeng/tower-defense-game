@@ -1,6 +1,23 @@
-import type { Monster, Tower, Position } from "../types/game";
+import type { Monster, Tower, Position, SpecialEffect } from "../types/game";
 import { GRID_SIZE } from "./constants";
 import { WAVE_CONFIGS } from "./configs";
+
+export const getValidSpecialEffect = (specialEffects: SpecialEffect[]) => {
+  return specialEffects.filter((specialEffect) => {
+    return (
+      (specialEffect.applyTime || 0) + specialEffect.duration >= Date.now()
+    );
+  });
+};
+
+export const findTargetEffect = (
+  specialEffects: SpecialEffect[],
+  targetType: string,
+) => {
+  return getValidSpecialEffect(specialEffects).find(
+    (specialEffect) => specialEffect.type === targetType,
+  );
+};
 
 export const calculateNewPosition = (
   monster: Monster,
@@ -48,10 +65,15 @@ export const calculateNewPosition = (
   const dx = nextPoint.x - monster.position.x;
   const dy = nextPoint.y - monster.position.y;
 
+  let speed = monster.speed;
+  const slowEffect = findTargetEffect(monster.specialEffects, "SLOW");
+  if (slowEffect) {
+    speed = speed * slowEffect.value;
+  }
   // 如果距离小于移动速度，直接到达该点
   if (
-    (dx !== 0 && Math.abs(dx) < monster.speed) ||
-    (dy !== 0 && Math.abs(dy) < monster.speed)
+    (dx !== 0 && Math.abs(dx) < speed) ||
+    (dy !== 0 && Math.abs(dy) < speed)
   ) {
     return [currentPathIndex, nextPoint];
   }
@@ -60,7 +82,7 @@ export const calculateNewPosition = (
     return [
       currentPathIndex,
       {
-        x: monster.position.x + (dx > 0 ? monster.speed : -monster.speed),
+        x: monster.position.x + (dx > 0 ? speed : -speed),
         y: monster.position.y,
       },
     ];
@@ -114,6 +136,7 @@ export const prepareWaveMonsters = (waveIndex: number) => {
         slowEffect: 1,
         pathIndex: 0,
         gold: config.gold,
+        specialEffects: [],
       });
     }
   });

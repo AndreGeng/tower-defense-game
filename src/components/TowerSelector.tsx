@@ -1,7 +1,6 @@
 import React from "react";
 import Konva from "konva";
 import { Group, Rect, Text, Image } from "react-konva";
-import type { TowerVariantType } from "../types/game";
 import {
   TOWER_PANEL_WIDTH,
   TOWER_PANEL_HEIGHT,
@@ -10,33 +9,14 @@ import {
 } from "../game/constants";
 import { NORMAL_TOWER, SLOW_TOWER } from "../game/configs";
 import { useTowerImg } from "../hooks/useTowerImg";
+import type { Tower } from "../types/game";
 
-export interface TowerOption {
-  type: TowerVariantType;
-  cost: number;
-  range: number;
-  label: string;
-}
-
-const TOWER_OPTIONS: TowerOption[] = [
-  {
-    type: NORMAL_TOWER.TYPE,
-    cost: NORMAL_TOWER.COST,
-    range: NORMAL_TOWER.RANGE,
-    label: NORMAL_TOWER.LABEL,
-  }, // 普通塔用靶心表示
-  {
-    type: SLOW_TOWER.TYPE,
-    cost: SLOW_TOWER.COST,
-    range: SLOW_TOWER.RANGE,
-    label: SLOW_TOWER.LABEL,
-  }, // 减速塔用雪花表示
-];
+const TOWER_OPTIONS = [NORMAL_TOWER, SLOW_TOWER];
 
 interface Props {
   onDragStart: (
     e: Konva.KonvaEventObject<MouseEvent>,
-    tower: TowerOption,
+    tower: Omit<Tower, "id" | "position" | "lastAttackTime">,
   ) => void;
   isDragging: boolean;
 }

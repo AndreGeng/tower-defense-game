@@ -1,3 +1,10 @@
+// 特效类型定义
+export interface SpecialEffect {
+  type: "SLOW";
+  value: number;
+  duration: number;
+  applyTime?: number;
+}
 // 怪物类型定义
 export interface Monster {
   id: number;
@@ -12,6 +19,7 @@ export interface Monster {
   height: number;
   pathIndex: number;
   gold: number;
+  specialEffects: SpecialEffect[];
 }
 
 // 位置类型
@@ -32,6 +40,7 @@ export type TowerVariantType = (typeof TowerVariant)[keyof typeof TowerVariant];
 // 塔类型定义
 export interface Tower {
   id: number;
+  label: string;
   type: TowerVariantType;
   position: Position;
   damage: number;
@@ -39,11 +48,9 @@ export interface Tower {
   cost: number;
   attackInterval: number;
   lastAttackTime: number;
-  specialEffect?: {
-    type: "slow";
-    value: number;
-    duration: number;
-  };
+  // 子弹速度
+  speed: number;
+  specialEffect?: SpecialEffect;
 }
 
 // 游戏状态

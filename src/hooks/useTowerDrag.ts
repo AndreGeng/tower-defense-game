@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Konva from "konva";
-import type { TowerOption } from "../components/TowerSelector";
-import type { GameState } from "../types/game";
+import type { GameState, Tower } from "../types/game";
 import {
   GRID_SIZE,
   GAME_WIDTH,
@@ -16,9 +15,8 @@ import {
   TOWER_PANEL_HEIGHT,
 } from "../game/constants";
 import type { PathPoint } from "../game/path";
-import { NORMAL_TOWER, SLOW_TOWER } from "../game/configs";
 
-interface DragTower extends TowerOption {
+interface DragTower extends Omit<Tower, "id" | "position" | "lastAttackTime"> {
   x: number;
   y: number;
   isValidPosition: boolean;
@@ -46,7 +44,7 @@ export const useTowerDrag = ({
 
   const handleDragStart = (
     e: Konva.KonvaEventObject<MouseEvent>,
-    tower: TowerOption,
+    tower: Omit<Tower, "id" | "position" | "lastAttackTime">,
   ) => {
     if (gameState.gold < tower.cost) {
       return;
@@ -137,24 +135,11 @@ export const useTowerDrag = ({
       // 添加新的防御塔
       const newTower = {
         id: newId,
-        type: dragTower.type,
         position: {
           x: dragTower.x + GRID_SIZE / 2,
           y: dragTower.y + GRID_SIZE / 2,
         },
-        damage:
-          dragTower.type === "NORMAL" ? NORMAL_TOWER.DAMAGE : SLOW_TOWER.DAMAGE,
-        attackInterval:
-          dragTower.type === "NORMAL"
-            ? NORMAL_TOWER.ATTACK_INTERVAL
-            : SLOW_TOWER.ATTACK_INTERVAL,
-        lastAttackTime: 0,
-        range: dragTower.range,
-        cost: dragTower.cost,
-        specialEffect:
-          dragTower.type === "SLOW"
-            ? { type: "slow" as const, value: 0.5, duration: 1000 }
-            : undefined,
+        ...dragTower,
       };
 
       setGameState((prev) => ({
